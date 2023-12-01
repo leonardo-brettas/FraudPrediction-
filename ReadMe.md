@@ -1,7 +1,15 @@
 
 # I found this technichal challenge from NuBank on https://github.com/leniel/NubankDataScientist and re-implemented it from scratch. 
 
-The original files are on `storage/originalfiles`
+## Overview
+
+* The original files are on `storage/originalfiles`
+* The project was developed using Django-Ninja, so the docs are on swagger `/docs`
+
+## Next Steps
+
+* Add Dockerfile
+* Add Unitary Tests
 
 # Challenge Description
 
