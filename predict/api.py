@@ -10,7 +10,7 @@ from predict.schemas import (
 from predict.models import RegressionModel
 from ninja.security import HttpBearer
 from nubank.settings import API_KEY
-from pandas import read_parquet
+from pandas import read_parquet, concat
 from os.path import join
 from time import time
 
@@ -29,11 +29,14 @@ def predict(request, payload: ModelRequest):
     return ModelResponse(id=payload.id, prediction=model.predict(payload))
 
 @router.post("/retrain", response=RetrainModelResponse)
-def retrain(request, payload: RetrainModelRequest, training_file: UploadedFile):
-    latest_model = RegressionModel.objects.get(id=payload.version) if payload.version else RegressionModel.objects.latest('created_at')
+def retrain(request, training_file: UploadedFile, payload: RetrainModelRequest = None):
+    if payload and payload.version:
+        latest_model = RegressionModel.objects.get(id=payload.version) 
+    else:
+        latest_model = RegressionModel.objects.latest('created_at')
     data = read_parquet(join("storage", "training_sets", latest_model.training_file))
     new_data = read_parquet(training_file.file)
-    data = data.append(new_data)
+    data = concat([data, new_data])
     new_training_file = "training_set" + str(int(time())) + ".parquet" 
     data.to_parquet(join("storage", "training_sets", new_training_file))
     score, regression_file = RegressionModel.train_new_model(data)    
