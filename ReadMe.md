@@ -8,8 +8,8 @@
 
 ## Next Steps
 
-* Add Dockerfile
-* Add Unitary Tests
+* Add Dockerfile for production enviroments
+* Increase unitary test coverage
 
 # Challenge Description
 
