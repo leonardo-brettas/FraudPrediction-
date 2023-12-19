@@ -12,10 +12,10 @@ class RegressionModelTestCase(TestCase):
         data = RegressionModel.apply_random_under_sampling(data)
         self.assertEqual(data["default"].value_counts().tolist(), [2, 2])
         
-    def test_check_if_data_is_balanced(self):
+    def test_check_if_data_is_unbalanced(self):
         data = DataFrame({"default": [0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
                           "score_3": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                           "score_4": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                           "score_5": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                           "score_6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
-        self.assertFalse(RegressionModel.check_if_data_is_balanced(data))
+        self.assertTrue(RegressionModel.check_if_data_is_unbalanced(data))

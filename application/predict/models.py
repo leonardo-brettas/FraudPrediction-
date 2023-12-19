@@ -29,7 +29,7 @@ class RegressionModel(models.Model):
     def train_new_model(data: DataFrame) -> Tuple[float, str]:
         data['score_3'] = data['score_3'].fillna(455)
         data['default'] = data['default'].fillna(False)
-        if not RegressionModel.check_if_data_is_balanced(data):
+        if RegressionModel.check_if_data_is_unbalanced(data):
             data = RegressionModel.apply_random_under_sampling(data)
         x_train, x_test, y_train, y_test = train_test_split(data[["score_3", "score_4", "score_5", "score_6"]],
                                                             data["default"], test_size=0.25, random_state=42)
@@ -59,8 +59,8 @@ class RegressionModel(models.Model):
         return model
     
     @staticmethod
-    def check_if_data_is_balanced(data: DataFrame) -> bool:
-        return data['default'].value_counts()[0] == data['default'].value_counts()[1]
+    def check_if_data_is_unbalanced(data: DataFrame) -> bool:
+        return data['default'].value_counts()[0] != data['default'].value_counts()[1]
     
     @staticmethod
     def apply_random_under_sampling(data: DataFrame) -> DataFrame:

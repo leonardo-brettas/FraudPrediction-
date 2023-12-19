@@ -16,7 +16,7 @@ RUN apt-get update && \
 # Diretorio de trabalho
 WORKDIR /app
 
-COPY . /app
+COPY ./application /app
 
 # Instalar dependências do Python
 RUN pip install --upgrade pip && \
@@ -27,9 +27,9 @@ RUN pip install --upgrade pip && \
 RUN python3 manage.py migrate
 
 #Expor a porta 8081
-EXPOSE 8081
+EXPOSE 8080
 # Executar o servidor de desenvolvimento
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8081"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8080"]
 
 # Iniciar Gunicorn para produção (Ainda falta ajustar)
 #CMD ["gunicorn", "public.wsgi:application", "-b", "0.0.0.0:8000"]

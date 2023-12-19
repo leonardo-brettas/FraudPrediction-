@@ -10,9 +10,7 @@ from predict.schemas import (
 from predict.models import RegressionModel
 from ninja.security import HttpBearer
 from nubank.settings import API_KEY
-from pandas import read_parquet, concat
-from os.path import join
-from time import time
+from pandas import read_parquet
 
 
 class BearerToken(HttpBearer):
