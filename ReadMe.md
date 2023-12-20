@@ -5,7 +5,7 @@
 
 * The original files are on `storage/originalfiles`
 * The project was developed using Django-Ninja, so the docs are on swagger `/docs`
-
+![1 Minunte Stress Test](image.png)
 ## Next Steps
 
 * Add Dockerfile for production enviroments

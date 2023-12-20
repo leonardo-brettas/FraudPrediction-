@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from decouple import config
 from redis import Redis
+import boto3
+from botocore.client import Config
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +30,19 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
+
+if DEBUG:
+    S3 = boto3.client(
+    's3',
+    endpoint_url=config('S3_HOST'),
+    aws_access_key_id=config('S3_ACCESS_KEY'),
+    aws_secret_access_key=config('S3_SECRET_KEY'),
+    config=Config(signature_version='s3v4'),
+    region_name=config('S3_REGION'),
+    verify=False
+    )
+else:
+    S3 = boto3.client('s3')
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=str).split(',')
 
@@ -79,8 +96,12 @@ WSGI_APPLICATION = 'nubank.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'HOST': config('DATABASE_HOST'),
+        'PORT': config('DATABASE_PORT'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
     }
 }
 

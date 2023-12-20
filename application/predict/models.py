@@ -7,7 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from time import time
 from os.path import join
-from nubank.settings import REDIS
+from pickle import loads as pickle_loads
+from nubank.settings import REDIS, S3
 from imblearn.under_sampling import RandomUnderSampler
 from io import BytesIO
 
@@ -33,15 +34,13 @@ class RegressionModel(models.Model):
             binary_data = REDIS.get(self.regression_file)
             binary_io = BytesIO(binary_data)
             model = load(binary_io)
-            self.set_model_expiration()
             return model
         else:
-            model = load(join("storage", "logistic_regressions", self.regression_file))
-            binary_io = BytesIO()
-            dump(model, binary_io)
-            binary_io.seek(0)
-            REDIS.set(self.regression_file, binary_io.read())
+            s3_file = S3.get_object(Bucket="app", Key=self.regression_file)
+            model_data = s3_file['Body'].read()
+            REDIS.set(self.regression_file, model_data)
             self.set_model_expiration()
+            model = load(BytesIO(model_data))
             return model
     
     def predict(self, payload):
@@ -64,6 +63,7 @@ class RegressionModel(models.Model):
         score = roc_auc_score(y_test, validation_predictions)
         regression_file = str(int(time())) + ".pkl"    
         dump(clf, join("storage", "logistic_regressions", regression_file))
+        S3.upload_file(join("storage", "logistic_regressions", regression_file), "app", regression_file)
         return score, regression_file
     
     @staticmethod

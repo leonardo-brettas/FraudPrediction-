@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+
   app:
     image: app
     container_name: app
@@ -17,7 +18,9 @@ services:
       - ./application/.env
     depends_on:
       - redis
-
+      - postgres
+      - s3
+    
   app2:
     image: app
     container_name: app2
@@ -34,6 +37,8 @@ services:
       - ./application/.env
     depends_on:
       - redis
+      - postgres
+      - s3
 
   app3:
     image: app
@@ -51,6 +56,9 @@ services:
       - ./application/.env
     depends_on:
       - redis
+      - postgres
+      - s3
+
   app4:
     image: app
     container_name: app4
@@ -67,6 +75,8 @@ services:
       - ./application/.env
     depends_on:
       - redis
+      - postgres
+      - s3
 
   nginx:
     image: nginx:latest
@@ -86,9 +96,34 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    command: redis-server --maxclients 10000
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
     
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+      POSTGRES_MAX_CONNECTIONS: 300
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  s3:
+    image: minio/minio
+    container_name: s3
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    volumes:
+      - ./s3-data:/data
+    command: server /data
