@@ -1,0 +1,94 @@
+version: '3.7'
+
+services:
+  app:
+    image: app
+    container_name: app
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: ./application/Dockerfile
+    volumes:
+      - ./application:/app
+    env_file:
+      - ./application/.env
+    depends_on:
+      - redis
+
+  app2:
+    image: app
+    container_name: app2
+    expose:
+      - "8080"
+    ports:
+      - "8081:8080"
+    build:
+      context: .
+      dockerfile: ./application/Dockerfile
+    volumes:
+      - ./application:/app
+    env_file:
+      - ./application/.env
+    depends_on:
+      - redis
+
+  app3:
+    image: app
+    container_name: app3
+    expose:
+      - "8080"
+    ports:
+      - "8082:8080"
+    build:
+      context: .
+      dockerfile: ./application/Dockerfile
+    volumes:
+      - ./application:/app
+    env_file:
+      - ./application/.env
+    depends_on:
+      - redis
+  app4:
+    image: app
+    container_name: app4
+    expose:
+      - "8080"
+    ports:
+      - "8083:8080"
+    build:
+      context: .
+      dockerfile: ./application/Dockerfile
+    volumes:
+      - ./application:/app
+    env_file:
+      - ./application/.env
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+      - app2
+      - app3
+      - app4
+    ports:
+      - "80:80"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    

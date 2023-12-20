@@ -7,7 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from time import time
 from os.path import join
+from nubank.settings import REDIS
 from imblearn.under_sampling import RandomUnderSampler
+from io import BytesIO
 
 class RegressionModel(models.Model):
     created_at = models.DateTimeField(verbose_name='Date that the model was created', auto_now_add=True)
@@ -19,8 +21,31 @@ class RegressionModel(models.Model):
     def __str__(self):
         return self.regression_file
     
+    
+    def check_if_model_on_redis(self):
+        return REDIS.exists(self.regression_file)
+    
+    def set_model_expiration(self):
+        REDIS.expire(self.regression_file, 60*60*1)
+    
+    def read_model_binary(self):
+        if self.check_if_model_on_redis():
+            binary_data = REDIS.get(self.regression_file)
+            binary_io = BytesIO(binary_data)
+            model = load(binary_io)
+            self.set_model_expiration()
+            return model
+        else:
+            model = load(join("storage", "logistic_regressions", self.regression_file))
+            binary_io = BytesIO()
+            dump(model, binary_io)
+            binary_io.seek(0)
+            REDIS.set(self.regression_file, binary_io.read())
+            self.set_model_expiration()
+            return model
+    
     def predict(self, payload):
-        model = load(join("storage", "logistic_regressions", self.regression_file))
+        model = self.read_model_binary()
         features = DataFrame([payload.dict()])
         features = features[["score_3", "score_4", "score_5", "score_6"]]
         return model.predict_proba(features)[0][0]
